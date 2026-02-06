@@ -18,16 +18,16 @@ class CheckFrontendUser
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
-    {
-        if (Auth::check() && Auth::user()->name === 'webuser') {
-            return $next($request);
-        }
-        Auth::logout();
-        return redirect('/login')->with('error', 'Access denied.');
-
-        // if ($request->ajax() || $request->wantsJson()) {
-        //     return response()->json(['message' => 'Please login first.'], 401);
-        // }
-        // return redirect('/login')->with('error', 'Please login first.');
+{
+    if (Auth::check()) {
+        return $next($request); // agar user logged in hai, allow
     }
+
+    if ($request->ajax() || $request->wantsJson()) {
+        return response()->json(['message' => 'Please login first.'], 401); // AJAX ke liye
+    }
+
+    return redirect('/login')->with('error', 'Please login first.'); // normal request ke liye
+}
+
 }

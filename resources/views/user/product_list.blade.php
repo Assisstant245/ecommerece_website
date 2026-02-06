@@ -284,60 +284,74 @@
         </div>
     </div>
     <script>
-        $(document).ready(function() {
-            $('.add-to-cart').on('click', function(e) {
-                e.preventDefault();
-                let button = $(this);
+$(document).ready(function() {
+    $('.add-to-cart').on('click', function(e) {
+        e.preventDefault();
+        let button = $(this);
+        let productId = $(this).data('id');
 
-                let productId = $(this).data('id');
-
-                $.ajax({
-                    url: '{{ route('user.cart') }}',
-                    type: 'POST',
-                    data: {
-                        product_id: productId,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: response.message,
-                            toast: true,
-                            position: 'top-end',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                        button.removeClass('btn-secondary')
-                            .addClass('btn-success')
-                            .html('<i class="fa fa-check"></i> Added')
-                            .prop('disabled', true);
-
-
-                        updateCartCount();
-
-                    },
-                    error: function(xhr) {
-                        let message = "Unexpected error occurred";
-
-                        if (xhr.status === 401) {
-                            message = "Please login first to add products to your cart.";
-                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
-                            message = xhr.responseJSON.message;
-                        }
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: message,
-                            toast: true,
-                            position: 'top-end',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    }
-
+        $.ajax({
+            url: '{{ route('user.cart') }}',
+            type: 'POST',
+            data: {
+                product_id: productId,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                // Product added successfully
+                Swal.fire({
+                    icon: 'success',
+                    title: response.message,
+                    toast: true,
+                    position: 'top-end',
+                    timer: 2000,
+                    showConfirmButton: false
                 });
-            });
+
+                button.removeClass('btn-secondary')
+                      .addClass('btn-success')
+                      .html('<i class="fa fa-check"></i> Added')
+                      .prop('disabled', true);
+
+                updateCartCount();
+
+                // Console log
+                console.log('Product added to cart: ID = ' + productId);
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    // User not logged in → redirect to login page
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Please login first',
+                        text: 'Redirecting to login page...',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+
+                    setTimeout(function() {
+                        window.location.href = "{{ url('login') }}";
+                    }, 1500);
+                    return;
+                }
+
+                let message = "Unexpected error occurred";
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: message,
+                    toast: true,
+                    position: 'top-end',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
         });
-    </script>
+    });
+});
+</script>
+
 @endsection

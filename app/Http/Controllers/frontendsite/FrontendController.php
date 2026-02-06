@@ -77,6 +77,8 @@ class FrontendController extends Controller
     {
         if (!Auth::check()) {
             return response()->json(['message' => 'Please login first'], 401);
+            
+            
         }
 
         $product = Product::find($request->product_id);
